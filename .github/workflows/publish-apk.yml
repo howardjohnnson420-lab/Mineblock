@@ -22,9 +22,9 @@ jobs:
     timeout-minutes: 90
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_BUILD_RUN_ID: "38390545821"
-      SOURCE_BUILD_SHA: "c3e35f24f46e78b23543dcf11aef6dd08a425382"
-      RELEASE_TAG: "mineblock-android-build-38390545821"
+      SOURCE_BUILD_RUN_ID: "38392550292"
+      SOURCE_BUILD_SHA: "e68b9a7eba679d7f53caf0caab09cf73c73a6aea"
+      RELEASE_TAG: "mineblock-android-build-38392550292"
     steps:
       - name: Check out repository history for GitHub Releases
         uses: actions/checkout@v4
