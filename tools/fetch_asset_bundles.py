@@ -12,6 +12,7 @@ import sys
 import urllib.request
 import zipfile
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 URLS_PATH = ROOT / "tools/asset_bundle_urls.json"
@@ -38,6 +39,11 @@ def inside_root(path: Path) -> bool:
 def download(url: str, dest: Path) -> None:
     if not url.startswith("https://"):
         raise ValueError(f"URL must use HTTPS: {url[:80]}")
+    parts = urlsplit(url)
+    if parts.hostname and parts.hostname.lower().endswith("dropbox.com"):
+        query = dict(parse_qsl(parts.query, keep_blank_values=True))
+        query["dl"] = "1"
+        url = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
     request = urllib.request.Request(url, headers={"User-Agent": "Mineblock-AssetBootstrap/1.0"})
     with urllib.request.urlopen(request, timeout=90) as response, dest.open("wb") as stream:
         shutil.copyfileobj(response, stream, length=1024 * 1024)
