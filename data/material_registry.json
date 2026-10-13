@@ -1,0 +1,21 @@
+{
+  "core_maps": {
+    "base_color": 90,
+    "normal": 90,
+    "orm": 90,
+    "height": 90
+  },
+  "optional_webp_maps": {
+    "Albedo": 90,
+    "Normal": 90,
+    "Roughness": 90,
+    "Displacement": 90
+  },
+  "orm_channel_convention": {
+    "R": "ambient_occlusion",
+    "G": "roughness",
+    "B": "metallic"
+  },
+  "height_maps": "sampled for tangent-space micro-normal detail in the custom PBR shader",
+  "webp_maps": "alternate material set selectable in Settings"
+}
