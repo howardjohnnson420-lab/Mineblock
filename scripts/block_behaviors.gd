@@ -25,7 +25,7 @@ static func family_for_id(id: String) -> String:
     if value.ends_with("_wall") or value == "wall" or value == "iron_bars" or value.ends_with("_pane") or value.ends_with("_bars"):
         return "connected_barrier"
     if value.ends_with("_leaves") or value in ["azalea_leaves", "flowering_azalea_leaves"]: return "foliage"
-    if value.starts_with("potted_") or value == "flower_pot": return "potted_plant"
+    if value.begins_with("potted_") or value == "flower_pot": return "potted_plant"
     if value.ends_with("_bed") or value == "bed": return "bed"
     if value.ends_with("_hanging_sign"): return "hanging_sign"
     if value.ends_with("_sign"): return "sign"
