@@ -898,7 +898,7 @@ func _update_connections_near(cell: Vector3i) -> void:
         if family in ["fence", "connected_barrier", "redstone_wire"]:
             var connections: Dictionary = (state.get("connections", {}) as Dictionary).duplicate(true)
             for key in HORIZONTAL_NEIGHBORS:
-                var neighbor := target + HORIZONTAL_NEIGHBORS[key]
+                var neighbor: Vector3i = target + Vector3i(HORIZONTAL_NEIGHBORS[key])
                 var neighbor_id := get_block_id(neighbor)
                 var neighbor_family := BlockBehaviors.family_for_id(neighbor_id)
                 var connected := false
@@ -1453,11 +1453,12 @@ func _resolve_fluid_reactions(fluid_rows: Array[Dictionary]) -> void:
         var cell: Vector3i = source["cell"]
         var id := String(source["id"])
         var state: Dictionary = source.get("state", {})
-        for offset in [Vector3i.RIGHT, Vector3i.LEFT, Vector3i.UP, Vector3i.DOWN, Vector3i(0,0,1), Vector3i(0,0,-1)]:
-            var neighbor := cell + offset
-            var neighbor_id := get_block_id(neighbor)
+        var offsets: Array[Vector3i] = [Vector3i.RIGHT, Vector3i.LEFT, Vector3i.UP, Vector3i.DOWN, Vector3i(0,0,1), Vector3i(0,0,-1)]
+        for offset: Vector3i in offsets:
+            var neighbor: Vector3i = cell + offset
+            var neighbor_id: String = get_block_id(neighbor)
             if BlockBehaviors.family_for_id(neighbor_id) != "fluid" or neighbor_id == id: continue
-            var lava_cell := cell if id == "lava" else neighbor
+            var lava_cell: Vector3i = cell if id == "lava" else neighbor
             var lava_state := get_block_state(lava_cell)
             var result_id := "obsidian" if bool(lava_state.get("source", true)) else "cobblestone"
             reactions[lava_cell] = result_id
