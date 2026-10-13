@@ -51,8 +51,13 @@ func _build_layout() -> void:
     title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     header.add_child(title)
     use_webp_toggle = CheckBox.new()
-    use_webp_toggle.text = "Use optional WebP maps"
-    use_webp_toggle.button_pressed = resolver.use_webp_maps
+    var webp_maps_available := not OS.has_feature("android_no_webp")
+    use_webp_toggle.text = "Use optional WebP maps" if webp_maps_available else "Optional WebP maps omitted (PNG maps active)"
+    use_webp_toggle.button_pressed = resolver.use_webp_maps and webp_maps_available
+    use_webp_toggle.disabled = not webp_maps_available
+    if not webp_maps_available:
+        use_webp_toggle.tooltip_text = "The Android APK keeps all core PNG BaseColor, Normal, ORM and Height maps; optional WebP files are not packaged."
+        resolver.set_webp_mode(false)
     use_webp_toggle.toggled.connect(func(value: bool): resolver.set_webp_mode(value); settings_changed.emit())
     header.add_child(use_webp_toggle)
     var close := Button.new()
