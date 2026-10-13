@@ -291,7 +291,7 @@ func _create_mobile_controls(root: Control) -> void:
     var joystick_node := Control.new()
     joystick_node.set_script(JOYSTICK_SCRIPT)
     joystick_node.name = "VirtualJoystick"
-    var joystick := joystick_node as VirtualJoystick
+    var joystick := joystick_node as MineblockVirtualJoystick
     joystick.anchor_left = 0.015; joystick.anchor_right = 0.015
     joystick.anchor_top = 1.0; joystick.anchor_bottom = 1.0
     joystick.offset_left = 8; joystick.offset_right = 174
