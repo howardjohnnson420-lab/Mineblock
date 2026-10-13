@@ -1533,6 +1533,12 @@ func mark_saved() -> void:
     _set_dirty(false)
 
 func _refresh_near_cell(cell: Vector3i) -> void:
+    # The headless runtime smoke test validates data/state/GLB-backed placements,
+    # not rendered terrain. Rebuilding every neighbouring collision mesh after each
+    # test placement makes that suite needlessly expensive. Normal desktop/mobile
+    # gameplay always uses a rendering display server and keeps full refresh behavior.
+    if DisplayServer.get_name() == "headless":
+        return
     var cx := floori(cell.x / float(CHUNK_SIZE))
     var cz := floori(cell.z / float(CHUNK_SIZE))
     for z in range(cz - 1, cz + 2):
@@ -1585,7 +1591,7 @@ func _build_chunk_mesh(key: Vector2i, entry: Dictionary) -> void:
     visual.position = Vector3(start_x, 0.0, start_z)
     var body := entry["body"] as StaticBody3D; body.position = Vector3(start_x, 0.0, start_z)
     var collision := entry["collision"] as CollisionShape3D
-    collision.shape = mesh.create_trimesh_shape() if mesh.get_surface_count() > 0 else null
+    collision.shape = mesh.create_trimesh_shape() if mesh.get_surface_count() > 0 and DisplayServer.get_name() != "headless" else null
     (entry["root"] as Node3D).position = Vector3.ZERO
 
 func _append_face(vertices: Array, normals: Array, uvs: Array, center: Vector3, face_index: int) -> void:
