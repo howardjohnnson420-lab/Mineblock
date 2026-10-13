@@ -44,3 +44,4 @@ hotbar_9={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":57)]}
 renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="mobile"
 environment/defaults/default_clear_color=Color(0.44,0.68,0.91,1)
+textures/vram_compression/import_etc2_astc=true
