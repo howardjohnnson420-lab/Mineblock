@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-apk-${{ github.ref }}
+  group: android-apk-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -102,7 +102,7 @@ jobs:
         run: '"$GODOT_BIN" --headless --editor --path . --import --quit'
 
       - name: Run Godot gameplay/runtime smoke tests
-        run: '"$GODOT_BIN" --headless --path . --script res://tests/runtime_smoke.gd'
+        run: timeout 180s "$GODOT_BIN" --headless --path . --script res://tests/runtime_smoke.gd
 
       - name: Export Android debug APK
         run: |
