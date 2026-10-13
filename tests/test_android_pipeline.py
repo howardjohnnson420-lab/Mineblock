@@ -23,8 +23,25 @@ if preset_path.exists():
         'package/unique_name="com.mineblock.creativeflatworld"',
         'architectures/arm64-v8a=true',
         'export_path="exports/Mineblock-debug.apk"',
+        'export_filter="all_resources"',
+        'custom_features="android_no_webp"',
+        'exclude_filter="*.webp"',
     ]:
         require(expected in preset, f"Android export preset has {expected}")
+# Only the optional WebP family is excluded from the APK. The original maps remain
+# in the source library, and all core PNG texture families plus the full GLB registry
+# are still imported, audited and exported.
+resolver_path = ROOT / "scripts/material_resolver.gd"
+inventory_path = ROOT / "scripts/inventory_panel.gd"
+require(resolver_path.is_file(), "material resolver exists")
+require(inventory_path.is_file(), "inventory panel exists")
+if resolver_path.exists():
+    resolver = resolver_path.read_text(encoding="utf-8")
+    require('OS.has_feature("android_no_webp")' in resolver, "Android export cannot activate omitted WebP maps")
+if inventory_path.exists():
+    inventory = inventory_path.read_text(encoding="utf-8")
+    require('Optional WebP maps omitted (PNG maps active)' in inventory, "Android UI explains optional WebP packaging")
+
 if workflow_path.exists():
     workflow = workflow_path.read_text(encoding="utf-8")
     for expected in [
