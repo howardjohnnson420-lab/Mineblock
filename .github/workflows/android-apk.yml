@@ -36,13 +36,11 @@ jobs:
           python3 tests/test_mechanics_contracts.py
           python3 tests/test_android_pipeline.py
 
-      - name: Require full source asset library
+      - name: Fetch supplied source asset bundles
+        run: python3 tools/fetch_asset_bundles.py
+
+      - name: Verify complete supplied asset library
         run: |
-          if [ ! -d assets/source_library/Minecraft_Realistic_Voxel_Assets_AI_Handoff/models ]; then
-            echo "::error::The source GLB and texture library has not been uploaded to this repository. No APK will be built from metadata alone."
-            echo "Expected files: assets/source_library/Minecraft_Realistic_Voxel_Assets_AI_Handoff/{models,materials,optional_webp_maps}"
-            exit 1
-          fi
           python3 tools/audit_assets.py
           python3 tests/test_project_consistency.py
 
