@@ -1,5 +1,5 @@
 extends Control
-class_name VirtualJoystick
+class_name MineblockVirtualJoystick
 signal value_changed(value: Vector2)
 var _active_touch: int = -1
 var _mouse_active := false
