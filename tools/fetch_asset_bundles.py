@@ -46,16 +46,34 @@ def download(url: str, dest: Path) -> None:
         raise ValueError(f"Downloaded content is not a ZIP file: {dest.name}")
 
 def safe_extract(zf: zipfile.ZipFile) -> None:
-    for info in zf.infolist():
-        if info.is_dir():
-            continue
-        target = ROOT / info.filename
-        if not inside_root(target):
-            raise ValueError(f"Unsafe ZIP member path: {info.filename}")
+    # One supplied normal-map bundle uses the asset-root-relative path while the
+    # other bundles include "assets/source_library/" already. Normalize both
+    # layouts to the same project-relative destination.
+    infos = zf.infolist()
     bad_member = zf.testzip()
     if bad_member:
         raise ValueError(f"Corrupt ZIP member: {bad_member}")
-    zf.extractall(ROOT)
+    for info in infos:
+        if info.is_dir():
+            continue
+        name = info.filename.replace("\\", "/")
+        prefix = "Minecraft_Realistic_Voxel_Assets_AI_Handoff/"
+        if name.startswith(prefix):
+            name = "assets/source_library/" + name
+        target = ROOT / name
+        if not inside_root(target):
+            raise ValueError(f"Unsafe ZIP member path: {info.filename}")
+    for info in infos:
+        if info.is_dir():
+            continue
+        name = info.filename.replace("\\", "/")
+        prefix = "Minecraft_Realistic_Voxel_Assets_AI_Handoff/"
+        if name.startswith(prefix):
+            name = "assets/source_library/" + name
+        target = ROOT / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with zf.open(info, "r") as src, target.open("wb") as dst:
+            shutil.copyfileobj(src, dst, length=1024 * 1024)
 
 def main() -> int:
     if EXPECTED_ROOT.is_dir() and any(EXPECTED_ROOT.rglob("*.glb")):
