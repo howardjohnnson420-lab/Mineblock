@@ -267,7 +267,7 @@ func _create_hotbar(root: Control) -> void:
     row.name = "Hotbar"
     row.anchor_left = 0.5; row.anchor_right = 0.5
     row.anchor_top = 1.0; row.anchor_bottom = 1.0
-    var viewport_width := get_viewport_rect().size.x
+    var viewport_width: float = get_viewport().get_visible_rect().size.x
     var row_width := minf(630.0, maxf(338.0, viewport_width * 0.82))
     row.offset_left = -row_width * 0.5; row.offset_right = row_width * 0.5
     row.offset_top = -84; row.offset_bottom = -12
@@ -352,8 +352,8 @@ func _create_pause_panel(root: Control) -> void:
     pause_panel.name = "PauseMenu"
     pause_panel.anchor_left = 0.5; pause_panel.anchor_right = 0.5
     pause_panel.anchor_top = 0.5; pause_panel.anchor_bottom = 0.5
-    var menu_width := minf(380.0, maxf(280.0, get_viewport_rect().size.x - 20.0))
-    var menu_height := minf(504.0, maxf(360.0, get_viewport_rect().size.y - 24.0))
+    var menu_width := minf(380.0, maxf(280.0, get_viewport().get_visible_rect().size.x - 20.0))
+    var menu_height := minf(504.0, maxf(360.0, get_viewport().get_visible_rect().size.y - 24.0))
     pause_panel.offset_left = -menu_width * 0.5; pause_panel.offset_right = menu_width * 0.5
     pause_panel.offset_top = -menu_height * 0.5; pause_panel.offset_bottom = menu_height * 0.5
     pause_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -397,8 +397,8 @@ func _create_options_panel(root: Control) -> void:
     options_panel.name = "Settings"
     options_panel.anchor_left = 0.5; options_panel.anchor_right = 0.5
     options_panel.anchor_top = 0.5; options_panel.anchor_bottom = 0.5
-    var options_width := minf(440.0, maxf(280.0, get_viewport_rect().size.x - 20.0))
-    var options_height := minf(470.0, maxf(360.0, get_viewport_rect().size.y - 24.0))
+    var options_width := minf(440.0, maxf(280.0, get_viewport().get_visible_rect().size.x - 20.0))
+    var options_height := minf(470.0, maxf(360.0, get_viewport().get_visible_rect().size.y - 24.0))
     options_panel.offset_left = -options_width * 0.5; options_panel.offset_right = options_width * 0.5
     options_panel.offset_top = -options_height * 0.5; options_panel.offset_bottom = options_height * 0.5
     options_panel.add_theme_stylebox_override("panel", _panel_style())
@@ -732,6 +732,15 @@ func _horizontal_dirs_from_key(key: String) -> Vector3i:
         _: return Vector3i(0,0,-1)
 
 
+func _yaw_for_facing(facing: String) -> float:
+    match facing:
+        "north": return 0.0
+        "east": return -PI * 0.5
+        "south": return PI
+        "west": return PI * 0.5
+    return 0.0
+
+
 func _point_hits_target(cell: Vector3i, point: Vector3) -> bool:
     var id := world.get_block_id(cell)
     if id.is_empty(): return false
@@ -769,6 +778,7 @@ func _point_hits_target(cell: Vector3i, point: Vector3) -> bool:
         return false
     var effective_yaw := yaw
     var root_rotation := Vector3(0, yaw, 0)
+    var root_offset: Vector3 = Vector3.ZERO
     if family in ["stairs", "door", "bed", "trapdoor", "fence_gate", "rail", "piston", "repeater", "comparator", "machine_container", "container", "shelf", "daylight_sensor", "piston_head", "bell"]:
         effective_yaw = _yaw_for_facing(String(state.get("facing", BlockBehaviors._facing_from_yaw(yaw))))
         root_rotation = Vector3(0, effective_yaw, 0)
@@ -800,7 +810,7 @@ func _point_hits_target(cell: Vector3i, point: Vector3) -> bool:
     if door_open:
         local_point = door_hinge_local + Basis(Vector3.UP, effective_yaw).inverse() * (local_point - door_hinge_world_offset)
     else:
-        local_point = Basis.from_euler(root_rotation).inverse() * local_point
+        local_point = Basis.from_euler(root_rotation).inverse() * (local_point - root_offset)
     if family == "slab":
         return bool(state.get("double", false)) or (local_point.y <= 0.0 if String(state.get("half", "bottom")) == "bottom" else local_point.y >= 0.0)
     if family == "stairs":
