@@ -13,3 +13,7 @@ This repository is being initialized for the Mineblock creative-building game. T
 
 ## Build pipeline
 See `.github/workflows/android-apk.yml` in the project source package. It is intended to run a verified Godot import and Android export, and to publish an APK artifact only when the checks pass.
+
+## Gameplay architecture
+
+The world uses **state-driven behaviors** for block families, including placement orientation, paired-block state, support rules, fluid and redstone state, and saved container/interaction properties.
