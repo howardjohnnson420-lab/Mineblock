@@ -80,6 +80,10 @@ func prepare_mesh(model: Dictionary, source_mesh: Mesh, mesh_instance: MeshInsta
     return result
 
 func set_webp_mode(enabled: bool) -> void:
+    # The Android APK intentionally omits only the optional WebP files; the
+    # complete PNG PBR map set remains bundled. Editor/desktop builds keep the toggle.
+    if OS.has_feature("android_no_webp"):
+        enabled = false
     if use_webp_maps == enabled: return
     use_webp_maps = enabled
     for key in _material_cache.keys():
