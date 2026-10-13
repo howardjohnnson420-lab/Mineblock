@@ -75,6 +75,31 @@ def safe_extract(zf: zipfile.ZipFile) -> None:
         with zf.open(info, "r") as src, target.open("wb") as dst:
             shutil.copyfileobj(src, dst, length=1024 * 1024)
 
+def prepare_bundle_cache_from_folder(url: str) -> None:
+    """Download one public Dropbox folder ZIP containing all eight source archives."""
+    folder_archive = CACHE / "mineblock_asset_folder.zip"
+    download(url, folder_archive)
+    expected = set(BUNDLES.values())
+    found: set[str] = set()
+    with zipfile.ZipFile(folder_archive) as outer:
+        for info in outer.infolist():
+            if info.is_dir():
+                continue
+            filename = Path(info.filename.replace("\\", "/")).name
+            if filename not in expected:
+                continue
+            dest = CACHE / filename
+            with outer.open(info, "r") as src, dest.open("wb") as dst:
+                shutil.copyfileobj(src, dst, length=1024 * 1024)
+            if not zipfile.is_zipfile(dest):
+                raise ValueError(f"Folder download contained an invalid bundle: {filename}")
+            found.add(filename)
+    missing = sorted(expected - found)
+    if missing:
+        raise ValueError("Public asset folder is missing bundles: " + ", ".join(missing))
+    print(f"Downloaded all {len(found)} source ZIPs from the shared asset folder.", flush=True)
+
+
 def main() -> int:
     if EXPECTED_ROOT.is_dir() and any(EXPECTED_ROOT.rglob("*.glb")):
         print("Source asset library already exists; skipping bundle download.")
@@ -83,23 +108,28 @@ def main() -> int:
         print("ERROR: tools/asset_bundle_urls.json is missing.", file=sys.stderr)
         return 2
     urls = json.loads(URLS_PATH.read_text(encoding="utf-8"))
+    folder_url = str(urls.get("asset_folder_url", "")).strip()
     absent = [key for key in BUNDLES if not str(urls.get(key, "")).strip()]
-    if absent:
-        print("ERROR: no downloadable asset bundle URL for: " + ", ".join(absent), file=sys.stderr)
-        print("Connect the storage containing the supplied ZIPs, upload all eight bundles, and populate tools/asset_bundle_urls.json.", file=sys.stderr)
+    if not folder_url and absent:
+        print("ERROR: no downloadable source URL configured; set asset_folder_url to an Anyone-with-link Dropbox folder URL, or provide all eight individual URLs.", file=sys.stderr)
+        print("Missing individual bundle URLs: " + ", ".join(absent), file=sys.stderr)
         return 3
     CACHE.mkdir(parents=True, exist_ok=True)
-    for key, filename in BUNDLES.items():
-        dest = CACHE / filename
-        print(f"Downloading {key}…", flush=True)
-        try:
-            download(str(urls[key]).strip(), dest)
+    try:
+        if folder_url:
+            print("Downloading source asset folder…", flush=True)
+            prepare_bundle_cache_from_folder(folder_url)
+        for key, filename in BUNDLES.items():
+            dest = CACHE / filename
+            if not folder_url:
+                print(f"Downloading {key}…", flush=True)
+                download(str(urls[key]).strip(), dest)
             with zipfile.ZipFile(dest) as archive:
                 safe_extract(archive)
             print(f"Extracted {filename}", flush=True)
-        except Exception as exc:
-            print(f"ERROR: bundle {key} failed: {exc}", file=sys.stderr)
-            return 4
+    except Exception as exc:
+        print(f"ERROR: source asset bundle setup failed: {exc}", file=sys.stderr)
+        return 4
     if not EXPECTED_ROOT.is_dir():
         print("ERROR: asset bundles extracted but expected source root is still absent.", file=sys.stderr)
         return 5
