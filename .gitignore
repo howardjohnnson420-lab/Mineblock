@@ -1,0 +1,12 @@
+.godot/
+.android/
+exports/
+export.cfg
+*.apk
+*.aab
+*.keystore
+*.jks
+*.tmp
+.DS_Store
+__pycache__/
+*.py[cod]
