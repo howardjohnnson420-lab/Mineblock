@@ -26,6 +26,11 @@ jobs:
       SOURCE_BUILD_SHA: "c3e35f24f46e78b23543dcf11aef6dd08a425382"
       RELEASE_TAG: "mineblock-android-build-38390545821"
     steps:
+      - name: Check out repository history for GitHub Releases
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download the successful build artifact
         uses: actions/download-artifact@v4
         with:
@@ -53,7 +58,7 @@ jobs:
           {
             echo "### Mineblock APK publication"
             echo "- Source build: [GitHub Actions run](https://github.com/$GITHUB_REPOSITORY/actions/runs/$SOURCE_BUILD_RUN_ID)"
-            echo "- SHA-256: `$actual`"
+            echo "- SHA-256: $actual"
             echo "- Size: $(du -h "$APK" | awk '{print $1}')"
           } >> "$GITHUB_STEP_SUMMARY"
 
