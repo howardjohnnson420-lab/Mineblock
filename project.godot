@@ -1,0 +1,46 @@
+; Clean project configuration for Mineblock. Source assets must be supplied in assets/source_library/.
+config_version=5
+
+[application]
+config/name="Mineblock Creative Flatworld"
+run/main_scene="res://scenes/main.tscn"
+run/max_fps=90
+config/features=PackedStringArray("4.7", "Mobile")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=800
+window/size/window_width_override=1280
+window/size/window_height_override=800
+window/stretch/mode="canvas_items"
+
+[physics]
+3d/default_gravity=24.0
+
+[input]
+move_forward={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":87)]}
+move_back={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":83)]}
+move_left={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":65)]}
+move_right={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":68)]}
+jump={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":32)]}
+fly_toggle={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":70)]}
+fly_down={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":4194325)]}
+interact_break={"deadzone":0.2,"events":[Object(InputEventMouseButton,"button_index":1)]}
+interact_place={"deadzone":0.2,"events":[Object(InputEventMouseButton,"button_index":2)]}
+inventory={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":69)]}
+pause={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":4194305)]}
+diagnostics={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":4194331)]}
+hotbar_1={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":49)]}
+hotbar_2={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":50)]}
+hotbar_3={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":51)]}
+hotbar_4={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":52)]}
+hotbar_5={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":53)]}
+hotbar_6={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":54)]}
+hotbar_7={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":55)]}
+hotbar_8={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":56)]}
+hotbar_9={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":57)]}
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+environment/defaults/default_clear_color=Color(0.44,0.68,0.91,1)
