@@ -1,0 +1,85 @@
+name: Publish verified Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: publish-mineblock-apk
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish the verified debug APK as a direct release download
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_BUILD_RUN_ID: "38390545821"
+      SOURCE_BUILD_SHA: "c3e35f24f46e78b23543dcf11aef6dd08a425382"
+      RELEASE_TAG: "mineblock-android-build-38390545821"
+    steps:
+      - name: Download the successful build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Mineblock-Godot-4.7.2-Android-debug-APK
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_BUILD_RUN_ID }}
+          path: release-assets
+
+      - name: Verify APK and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="release-assets/Mineblock-debug.apk"
+          CHECKSUM="release-assets/Mineblock-debug.apk.sha256"
+          test -s "$APK"
+          test -s "$CHECKSUM"
+          expected="$(awk 'NR==1 {print $1}' "$CHECKSUM")"
+          actual="$(sha256sum "$APK" | awk '{print $1}')"
+          test "$actual" = "$expected"
+          unzip -tq "$APK" >/dev/null
+          unzip -Z1 "$APK" | grep -Fxq "AndroidManifest.xml"
+          echo "APK SHA-256: $actual"
+          echo "APK bytes: $(stat -c %s "$APK")"
+          {
+            echo "### Mineblock APK publication"
+            echo "- Source build: [GitHub Actions run](https://github.com/$GITHUB_REPOSITORY/actions/runs/$SOURCE_BUILD_RUN_ID)"
+            echo "- SHA-256: `$actual`"
+            echo "- Size: $(du -h "$APK" | awk '{print $1}')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create or refresh downloadable GitHub release
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTES="$RUNNER_TEMP/release-notes.md"
+          cat > "$NOTES" <<EOF
+          Mineblock Creative Flatworld Android debug build.
+
+          - Engine: Godot 4.7.2
+          - Source commit used for the build: $SOURCE_BUILD_SHA
+          - Asset inventory audit: passed
+          - Godot runtime smoke tests: passed
+          - Android APK export: passed
+          - Variant: arm64-v8a debug APK (not a Play Store release build)
+
+          SHA-256 is supplied as the adjacent checksum asset.
+          EOF
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/Mineblock-debug.apk release-assets/Mineblock-debug.apk.sha256 --clobber
+          else
+            gh release create "$RELEASE_TAG" release-assets/Mineblock-debug.apk release-assets/Mineblock-debug.apk.sha256 \
+              --target "$SOURCE_BUILD_SHA" \
+              --title "Mineblock Android Debug APK" \
+              --notes-file "$NOTES"
+          fi
+          echo "Direct APK URL: https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/Mineblock-debug.apk" >> "$GITHUB_STEP_SUMMARY"
