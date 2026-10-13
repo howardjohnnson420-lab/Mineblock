@@ -98,10 +98,10 @@ jobs:
           EOF_SETTINGS
 
       - name: Import all resources with Godot 4.7.2
-        run: "$GODOT_BIN" --headless --editor --path . --import --quit
+        run: '"$GODOT_BIN" --headless --editor --path . --import --quit'
 
       - name: Run Godot gameplay/runtime smoke tests
-        run: "$GODOT_BIN" --headless --path . --script res://tests/runtime_smoke.gd
+        run: '"$GODOT_BIN" --headless --path . --script res://tests/runtime_smoke.gd'
 
       - name: Export Android debug APK
         run: |
